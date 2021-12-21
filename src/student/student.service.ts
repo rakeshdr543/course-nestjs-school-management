@@ -33,4 +33,15 @@ export class StudentService {
     const student = await this.studentRepository.findOne({ id });
     return student;
   }
+
+  async getManyStudents(studentIds: string[]) {
+    const students = await this.studentRepository.find({
+      where: {
+        id: {
+          $in: studentIds,
+        },
+      },
+    });
+    return students;
+  }
 }
