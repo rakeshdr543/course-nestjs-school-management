@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Lesson } from './lesson/lesson.entity';
@@ -8,12 +9,19 @@ import { StudentModule } from './student/student.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'mongodb',
-      url: 'mongodb+srv://root:root@cluster0.oxvs2.mongodb.net/school?retryWrites=true&w=majority',
-      synchronize: true,
-      useUnifiedTopology: true,
-      entities: [Lesson, Student],
+    ConfigModule.forRoot({
+      envFilePath: ['.env.dev'],
+    }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        type: 'mongodb',
+        url: configService.get('MONGO_URI'),
+        synchronize: true,
+        useUnifiedTopology: true,
+        entities: [Lesson, Student],
+      }),
     }),
     GraphQLModule.forRoot({
       autoSchemaFile: true,
